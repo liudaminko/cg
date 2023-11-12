@@ -132,40 +132,32 @@ export default {
 
       ctx.putImageData(imageData, 0, 0);
     },
-    handleCMYKChange(cyan, magenta, yellow, black) {
+    handleCMYKChange(value) {
+      console.log("new yellow color: " + value);
       const canvas = this.$refs.canvas;
       const ctx = canvas.getContext("2d");
-
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
 
-      const rgb = CMYKToRGB(
-        cyan / 100,
-        magenta / 100,
-        yellow / 100,
-        black / 100
-      );
+      for (let i = 0; i < imageData.data.length; i += 4) {
+        const red = imageData.data[i];
+        const green = imageData.data[i + 1];
+        const blue = imageData.data[i + 2];
 
-      const yellowMin = [240, 190, 50];
-      const yellowMax = [255, 255, 100];
+        // Check if RGB values are in yellow range
+        if (isYellow(red, green, blue)) {
+          // Get current CMYK
+          const cmyk = RGBToCMYK(red, green, blue);
 
-      for (let i = 0; i < data.length; i += 4) {
-        const red = data[i];
-        const green = data[i + 1];
-        const blue = data[i + 2];
+          // Update yellow channel
+          cmyk[2] = value;
+          cmyk[1] = Math.min(100, cmyk[1] * 2);
 
-        // check if color is yellow in RGB
-        if (
-          red >= yellowMin[0] &&
-          red <= yellowMax[0] &&
-          green >= yellowMin[1] &&
-          green <= yellowMax[1] &&
-          blue >= yellowMin[2] &&
-          blue <= yellowMax[2]
-        ) {
-          data[i] = rgb[0];
-          data[i + 1] = rgb[1];
-          data[i + 2] = rgb[2];
+          // Convert back to RGB
+          const rgb = CMYKToRGB(cmyk[0], cmyk[1], cmyk[2], cmyk[3]);
+
+          imageData.data[i] = rgb[0];
+          imageData.data[i + 1] = rgb[1];
+          imageData.data[i + 2] = rgb[2];
         }
       }
 
@@ -173,6 +165,19 @@ export default {
     },
   },
 };
+function isYellow(r, g, b) {
+  const yellowMin = [240, 190, 50];
+  const yellowMax = [255, 255, 100];
+
+  return (
+    r >= yellowMin[0] &&
+    r <= yellowMax[0] &&
+    g >= yellowMin[1] &&
+    g <= yellowMax[1] &&
+    b >= yellowMin[2] &&
+    b <= yellowMax[2]
+  );
+}
 function RGBToHSL(r, g, b) {
   // Make r, g, and b fractions of 1
   r /= 255;
@@ -257,7 +262,41 @@ function HSLToRGB(h, s, l) {
 
   return [r, g, b];
 }
+
+function RGBToCMYK(r, g, b) {
+  r = Math.min(255, Math.max(0, r));
+  g = Math.min(255, Math.max(0, g));
+  b = Math.min(255, Math.max(0, b));
+
+  // Normalize RGB values to the range [0, 1]
+  const normalizedR = r / 255;
+  const normalizedG = g / 255;
+  const normalizedB = b / 255;
+
+  // Calculate the K (black) component
+  const k = 1 - Math.max(normalizedR, normalizedG, normalizedB);
+
+  // Calculate the C (cyan), M (magenta), and Y (yellow) components
+  const c = (1 - normalizedR - k) / (1 - k);
+  const m = (1 - normalizedG - k) / (1 - k);
+  const y = (1 - normalizedB - k) / (1 - k);
+
+  // Ensure that the CMY components are in the range [0, 1]
+  const cyan = Math.min(1, Math.max(0, c));
+  const magenta = Math.min(1, Math.max(0, m));
+  const yellow = Math.min(1, Math.max(0, y));
+  const black = Math.min(1, Math.max(0, k));
+
+  // Return an object containing the CMYK values
+  return [cyan, magenta, yellow, black];
+}
 function CMYKToRGB(c, m, y, k) {
+  // Ensure that the CMY components are in the range [0, 1]
+  c = Math.min(1, Math.max(0, c));
+  m = Math.min(1, Math.max(0, m));
+  y = y / 100; // Normalize yellow to the range [0, 1]
+  k = Math.min(1, Math.max(0, k));
+
   const r = 255 * (1 - c) * (1 - k);
   const g = 255 * (1 - m) * (1 - k);
   const b = 255 * (1 - y) * (1 - k);
