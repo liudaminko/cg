@@ -23,7 +23,6 @@ export default {
       showCMYK: false,
       showPicture: false,
       showUploadMenu: true,
-      yellowSaturation: 0,
       popupTitle: 'Color',
       popupText: 'Color models like HSL (Hue, Saturation, Lightness) and CMYK (Cyan, Magenta, Yellow, Key/Black) play crucial roles in digital design and printing. These models help in achieving precise control over colors in various applications.\nHSL provides a user-friendly approach to manipulating colors. Hue represents the type of color, saturation controls the intensity, and lightness manages the brightness. It`s a popular choice for artists and designers seeking to create visually pleasing and harmonious color schemes. \nIn contrast, CMYK is essential in the printing industry. It combines cyan, magenta, yellow, and black inks to produce a wide spectrum of colors. Printers use this model to ensure accurate color reproduction in magazines, brochures, and other printed materials.\nBy integrating these color models into fractal generation, you can create captivating and customizable fractal art. These models allow for precise adjustments of color gradients, providing a vibrant and dynamic visual experience in fractal patterns. Whether for digital art or printing projects, understanding and utilizing HSL and CMYK in fractal design opens up a world of creative possibilities.',
     }
@@ -91,9 +90,8 @@ export default {
         this.showPicture = false;
         this.showUploadMenu = true;
     },
-    handleHSLChange(saturation) {
-        console.log(saturation)
-        this.updateYellowSaturation(saturation);
+    handleHSLChange(saturationValue) {
+        this.updateYellowSaturation(saturationValue);
     },
     updateYellowSaturation(value) {
         console.log("saturation we get: " + value);
@@ -120,6 +118,7 @@ export default {
             if (hsl[0] >= yellowHueMin && hsl[0] <= yellowHueMax && hsl[1] >= yellowSaturationMin && hsl[1] <= yellowSaturationMax) 
             {
                 hsl[1] = value;
+                console.log(hsl[1]);
                 const rgb = HSLToRGB(hsl[0], hsl[1], hsl[2]);
                 data[i] = rgb[0];
                 data[i + 1] = rgb[1];
@@ -128,9 +127,35 @@ export default {
         }
 
         ctx.putImageData(imageData, 0, 0);
-}
+    },
+    handleCMYKChange(cyan, magenta, yellow, black) {
+        const canvas = this.$refs.canvas;
+        const ctx = canvas.getContext('2d');
 
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
 
+            const rgb = CMYKToRGB(cyan / 100, magenta / 100, yellow / 100, black / 100);
+
+            const yellowMin = [240, 190, 50];  
+            const yellowMax = [255, 255, 100];
+
+            for (let i = 0; i < data.length; i += 4) {
+                const red = data[i];
+                const green = data[i + 1];
+                const blue = data[i + 2];
+
+                // check if color is yellow in RGB
+                if (red >= yellowMin[0] && red <= yellowMax[0] && green >= yellowMin[1] && green <= yellowMax[1] && blue >= yellowMin[2] && blue <= yellowMax[2]) 
+                {
+                    data[i] = rgb[0];
+                    data[i + 1] = rgb[1];
+                    data[i + 2] = rgb[2];
+                }
+            }
+
+            ctx.putImageData(imageData, 0, 0);
+    }
 
   }
 }
@@ -207,8 +232,15 @@ function HSLToRGB(h, s, l) {
 
   return [r, g, b];
 }
+function CMYKToRGB(c, m, y, k) {
+    const r = 255 * (1 - c) * (1 - k);
+    const g = 255 * (1 - m) * (1 - k);
+    const b = 255 * (1 - y) * (1 - k);
 
+    return [Math.round(r), Math.round(g), Math.round(b)];
+}
 </script>
+
 <template>
     <div class="container">
       <div class="content_container">
@@ -217,7 +249,7 @@ function HSLToRGB(h, s, l) {
             <ColorButtons @hsl="showHSLComponent" @cmyk="showCMYKComponent"></ColorButtons>
           </div>
           <HSLSlider v-if="showHSL" @change="handleHSLChange"/>
-          <CMYKSlider v-if="showCMYK"/>
+          <CMYKSlider v-if="showCMYK" @change-cmyk="handleCMYKChange"/>
           <div class="footer_buttons">
             <ActionButton @click="showPopup = true">Learn more</ActionButton>
             <ActionButton @click="exportData">Save as</ActionButton>
@@ -297,10 +329,10 @@ function HSLToRGB(h, s, l) {
   .uploaded_image_container {
     display: flex;
     flex-direction: column;
-    align-items: flex-end; /* Align items to the right */
+    align-items: flex-end;
     gap: 16px;
     margin: 30px;
-    position: relative; /* Enable positioning for absolute child */
+    position: relative;
   }
   
   .uploaded_image_container img {
@@ -310,7 +342,7 @@ function HSLToRGB(h, s, l) {
   }
   
   .close_picture {
-    position: absolute; /* Position absolutely within the parent */
+    position: absolute; 
     top: 0;
     right: 0;
     cursor: pointer;

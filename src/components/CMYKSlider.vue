@@ -9,6 +9,11 @@ export default {
             yellowValue: 0,
             blackValue: 0
         }
+    },
+    methods: {
+        emitChange() {
+            this.$emit('change-cmyk', this.cyanValue, this.magentaValue, this.yellowValue, this.blackValue);
+        }
     }
 }
 </script>
@@ -35,7 +40,7 @@ export default {
                 <p>Yellow: </p>
                 <span class="value">{{ yellowValue }}</span>
             </div>
-            <input type="range" min="0" max="100" v-model="yellowValue" class="slider" id="yellow_slider">
+            <input type="range" min="0" max="100" v-model="yellowValue" class="slider" id="yellow_slider" @input="emitChange">
         </div>
         <div class="black_container">
             <div class="value_container">

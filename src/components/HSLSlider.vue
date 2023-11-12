@@ -1,34 +1,24 @@
 <script>
 export default {
-  name: 'HSLSlider',
-  data() {
-    return {
-      hueValue: 0,
-      saturationValue: 0,
-      lightnessValue: 0, // Initialize lightnessValue here
-    };
-  },
-  watch: {
-    saturationValue() {
-      this.emitChange();
-    }
-  },
-  methods: {
-    emitChange() {
-      this.$emit('change', this.saturationValue);
+    name: 'HSLSlider',
+    data() {
+        return {
+        hueValue: 0,
+        saturationValue: 0,
+        lightnessValue: 0,
+        lastEmittedSaturationValue: 0,
+        };
     },
-  },
-  
+    methods: {
+        handleMouseUp() {
+            if (this.saturationValue !== this.lastEmittedSaturationValue) {
+                this.$emit('change', this.saturationValue);
+                this.lastEmittedSaturationValue = this.saturationValue;
+            }
+        },
+    },
+    
 };
-function debounce(callback, delay) {
-  let timerId;
-  return function() {
-    clearTimeout(timerId);
-    timerId = setTimeout(() => {
-      callback.apply(this, arguments);
-    }, delay);
-  };
-}
 </script>
 
 
@@ -47,14 +37,14 @@ function debounce(callback, delay) {
                 <p>Saturation: </p>
                 <span class="value">{{ saturationValue }}</span>
             </div>
-            <input type="range" min="0" max="100" v-model="saturationValue" class="slider" id="sat_slider">
+            <input type="range" min="0" max="100" v-model="saturationValue" class="slider" id="sat_slider" @input="handleMouseUp">
         </div>
         <div class="lightness_container">
             <div class="value_container">
                 <p>Lightness: </p>
                 <span class="value">{{ lightnessValue }}</span>
             </div>
-            <input type="range" min="0" max="100" v-model="lightnessValue" class="slider" id="light_slider">
+            <input type="range" min="0" max="100" v-model="lightnessValue" class="slider" id="light_slider" >
         </div>
         
     </div>
