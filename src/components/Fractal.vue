@@ -9,7 +9,80 @@ export default {
   data() {
     return {
       scale: 100,
+      colorPalettes: [
+        {
+          name: "Grayscale",
+          colors: [
+            "#000000",
+            "#333333",
+            "#666666",
+            "#999999",
+            "#CCCCCC",
+            "#FFFFFF",
+          ],
+        },
+        {
+          name: "Rainbow",
+          colors: [
+            "#FF0000",
+            "#FFA500",
+            "#FFFF00",
+            "#008000",
+            "#0000FF",
+            "#4B0082",
+            "#9400D3",
+          ],
+        },
+        {
+          name: "Pastel",
+          colors: [
+            "#FFB6C1",
+            "#FFD700",
+            "#ADFF2F",
+            "#87CEEB",
+            "#FF69B4",
+            "#BA55D3",
+            "#7B68EE",
+          ],
+        },
+        {
+          name: "Earth Tones",
+          colors: [
+            "#8B4513",
+            "#CD853F",
+            "#D2691E",
+            "#A0522D",
+            "#BC8F8F",
+            "#8B0000",
+            "#B8860B",
+          ],
+        },
+        {
+          name: "Cool Blues",
+          colors: [
+            "#66CCCC",
+            "#3399FF",
+            "#0066CC",
+            "#0099CC",
+            "#3366FF",
+            "#99CCFF",
+            "#003366",
+          ],
+        },
+      ],
     };
+  },
+  props: {
+    selectedPalette: {
+      type: Number,
+      required: true,
+    },
+  },
+  watch: {
+    selectedPalette() {
+      this.clearCanvas();
+      this.generateFractal();
+    },
   },
   mounted() {
     this.generateFractal();
@@ -36,17 +109,26 @@ export default {
           let z = { re: 0, im: 0 };
           let iteration = 0;
 
-          while (iteration < this.maxIterations && z.re * z.re + z.im * z.im < 4) {
+          while (
+            iteration < this.maxIterations &&
+            z.re * z.re + z.im * z.im < 4
+          ) {
             const prevZ = { re: z.re, im: z.im };
-            z.re = Math.sin(prevZ.re) * prevZ.re - Math.sin(prevZ.im) * prevZ.im;
-            z.im = Math.sin(prevZ.re) * prevZ.im + Math.sin(prevZ.im) * prevZ.re;
+            z.re =
+              Math.sin(prevZ.re) * prevZ.re - Math.sin(prevZ.im) * prevZ.im;
+            z.im =
+              Math.sin(prevZ.re) * prevZ.im + Math.sin(prevZ.im) * prevZ.re;
             z.re += c.re;
             z.im += c.im;
             iteration++;
           }
 
-          const brightness = (iteration / this.maxIterations) * 255;
-          ctx.fillStyle = `rgb(${brightness},${brightness},${brightness})`;
+          const color =
+            this.colorPalettes[this.selectedPalette].colors[
+              iteration % this.colorPalettes[this.selectedPalette].colors.length
+            ];
+
+          ctx.fillStyle = color;
           ctx.fillRect(x, y, 1, 1);
         }
       }
@@ -65,7 +147,7 @@ export default {
   },
   computed: {
     maxIterations() {
-      return 100; // Adjust the maximum iterations as needed
+      return 100;
     },
   },
 };
