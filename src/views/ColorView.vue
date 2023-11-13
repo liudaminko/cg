@@ -23,6 +23,9 @@ export default {
       showCMYK: false,
       showPicture: false,
       showUploadMenu: true,
+      hoveredColor: null,
+      mouseX: 0,
+      mouseY: 0,
       popupTitle: "Color",
       popupText:
         "Color models like HSL (Hue, Saturation, Lightness) and CMYK (Cyan, Magenta, Yellow, Key/Black) play crucial roles in digital design and printing. These models help in achieving precise control over colors in various applications.\nHSL provides a user-friendly approach to manipulating colors. Hue represents the type of color, saturation controls the intensity, and lightness manages the brightness. It`s a popular choice for artists and designers seeking to create visually pleasing and harmonious color schemes. \nIn contrast, CMYK is essential in the printing industry. It combines cyan, magenta, yellow, and black inks to produce a wide spectrum of colors. Printers use this model to ensure accurate color reproduction in magazines, brochures, and other printed materials.\nBy integrating these color models into fractal generation, you can create captivating and customizable fractal art. These models allow for precise adjustments of color gradients, providing a vibrant and dynamic visual experience in fractal patterns. Whether for digital art or printing projects, understanding and utilizing HSL and CMYK in fractal design opens up a world of creative possibilities.",
@@ -47,6 +50,21 @@ export default {
       downloadLink.href = imageDataURL;
       downloadLink.download = "modified_image.jpg";
       downloadLink.click();
+    },
+    handleMouseHover(event) {
+      const canvas = this.$refs.canvas;
+      const rect = canvas.getBoundingClientRect();
+      const ctx = canvas.getContext("2d");
+      this.mouseX = event.clientX - rect.left;
+      this.mouseY = event.clientY - rect.top;
+
+      const pixel = ctx.getImageData(this.mouseX, this.mouseY, 1, 1);
+      const color = `rgb(${pixel.data[0]}, ${pixel.data[1]}, ${pixel.data[2]})`;
+
+      this.hoveredColor = color;
+    },
+    clearHoveredColor() {
+      this.hoveredColor = null;
     },
     handleImageUpload(event) {
       const input = event.target;
@@ -103,7 +121,6 @@ export default {
 
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-      // range of yellow color in HSL
       const yellowHueMin = 40;
       const yellowHueMax = 80;
       const yellowSaturationMin = 50;
@@ -115,7 +132,6 @@ export default {
         const blue = imageData.data[i + 2];
 
         const hsl = RGBToHSL(red, green, blue);
-        // check if color is yellow
         const isYellowColor =
           hsl[0] >= yellowHueMin &&
           hsl[0] <= yellowHueMax &&
@@ -143,16 +159,12 @@ export default {
         const green = imageData.data[i + 1];
         const blue = imageData.data[i + 2];
 
-        // Check if RGB values are in yellow range
         if (isYellow(red, green, blue)) {
-          // Get current CMYK
           const cmyk = RGBToCMYK(red, green, blue);
 
-          // Update yellow channel
           cmyk[2] = value;
-          cmyk[1] = Math.min(100, cmyk[1] * 2);
+          cmyk[1] = Math.min(100, cmyk[1] * 0.5);
 
-          // Convert back to RGB
           const rgb = CMYKToRGB(cmyk[0], cmyk[1], cmyk[2], cmyk[3]);
 
           imageData.data[i] = rgb[0];
@@ -166,7 +178,7 @@ export default {
   },
 };
 function isYellow(r, g, b) {
-  const yellowMin = [240, 190, 50];
+  const yellowMin = [200, 160, 0];
   const yellowMax = [255, 255, 100];
 
   return (
@@ -323,8 +335,25 @@ function CMYKToRGB(c, m, y, k) {
         </div>
       </div>
       <RenderContainer>
+        <div
+          v-if="hoveredColor"
+          class="color-tooltip"
+          :style="{
+            backgroundColor: hoveredColor,
+            top: `${mouseY + 120}px`,
+            left: `${mouseX + 360}px`,
+          }"
+        >
+          {{ hoveredColor }}
+        </div>
         <div v-if="showPicture" class="uploaded_image_container">
-          <canvas ref="canvas" width="900" height="500"></canvas>
+          <canvas
+            ref="canvas"
+            width="900"
+            height="500"
+            @mousemove="handleMouseHover"
+            @mouseout="clearHoveredColor"
+          ></canvas>
           <img
             class="close_picture"
             src="../assets/cancel.png"
@@ -422,5 +451,15 @@ p {
   top: 0;
   right: 0;
   cursor: pointer;
+}
+
+.color-tooltip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 8px;
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 100;
 }
 </style>
