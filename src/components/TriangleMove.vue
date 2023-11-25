@@ -95,19 +95,19 @@ export default {
         [this.scale, 0],
         [0, this.scale],
       ];
-      const scaledPoints = this.scalePoints(translatedPoints);
-      /*
+
       // Apply scaling to each translated point
       const scaledPoints = [];
       for (let i = 0; i < translatedPoints.length; i += 2) {
         const point = this.applyMatrix(scalingMatrix, [
           translatedPoints[i],
           translatedPoints[i + 1],
-          1, // Append 1 for scaling in 2D
+          1,
         ]);
+        console.log("scaled points: " + point[0] + ", " + point[1]);
         scaledPoints.push(point[0], point[1]);
       }
-      */
+
       console.log("After scaling - Vertices:", scaledPoints);
 
       // Update vertices directly
@@ -122,32 +122,27 @@ export default {
       this.drawCoordinatePlane();
       this.drawTriangle();
     },
-    scalePoints(points) {
-      // Scaling matrix
-      const scalingMatrix = [
-        [this.coordinates.scale, 0],
-        [0, this.coordinates.scale],
-      ];
-
-      const scaledPoints = [];
-      for (let i = 0; i < points.length; i += 2) {
-        const point = this.applyMatrix(scalingMatrix, [
-          points[i],
-          points[i + 1],
-          1,
-        ]);
-        scaledPoints.push(point[0], point[1]);
-      }
-
-      return scaledPoints;
-    },
     applyMatrix(matrix, point) {
-      const x =
-        matrix[0][0] * point[0] + matrix[0][1] * point[1] + matrix[0][2];
-      const y =
-        matrix[1][0] * point[0] + matrix[1][1] * point[1] + matrix[1][2];
+      const numRows = matrix.length;
+      const numCols = matrix[0].length;
 
-      return [x, y];
+      if (numCols === 3) {
+        // 2x3 matrix (translation)
+        const x =
+          matrix[0][0] * point[0] + matrix[0][1] * point[1] + matrix[0][2];
+        const y =
+          matrix[1][0] * point[0] + matrix[1][1] * point[1] + matrix[1][2];
+        return [x, y];
+      } else if (numCols === 2) {
+        // 2x2 matrix (scaling)
+        const x = matrix[0][0] * point[0] + matrix[0][1] * point[1];
+        const y = matrix[1][0] * point[0] + matrix[1][1] * point[1];
+        return [x, y];
+      } else {
+        // Unsupported matrix size
+        console.error("Unsupported matrix size");
+        return [NaN, NaN];
+      }
     },
     drawCoordinatePlane() {
       const canvas = this.$refs.canvas;

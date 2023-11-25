@@ -51,7 +51,7 @@ export default {
       <div class="buttons">
         <Params
           v-model="triangleCoordinates"
-          @update:coordinates="triangleCoordinates = $event"
+          @update:params="triangleCoordinates = $event"
         />
         <div class="header_buttons">
           <AnimateButton @click="startAnimation"></AnimateButton>

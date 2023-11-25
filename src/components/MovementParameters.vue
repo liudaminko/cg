@@ -35,13 +35,7 @@ export default {
   },
   methods: {
     handleMouseUp() {
-      if (this.scaleValue !== this.lastEmittedScaleValue) {
-        console.log("change: scale is now " + this.scaleValue);
-        if (Number.isInteger(this.scaleValue)) {
-          this.$emit("change", this.scaleValue);
-          this.lastEmittedScaleValue = this.scaleValue;
-        }
-      }
+      this.$emit("input", { ...this.value, scale: this.scaleValue });
     },
     selectClick() {
       this.showMenu = !this.showMenu;
@@ -58,12 +52,15 @@ export default {
         this.pointB[coord] = parseFloat(value);
       } else if (point == "pointC") {
         this.pointC[coord] = parseFloat(value);
+      } else if (point == "scale") {
+        this.scaleValue = parseFloat(value);
       }
 
-      this.$emit("update:coordinates", {
+      this.$emit("update:params", {
         pointA: this.pointA,
         pointB: this.pointB,
         pointC: this.pointC,
+        scale: this.scaleValue,
       });
     },
   },
@@ -139,7 +136,7 @@ export default {
         v-model="scaleValue"
         class="slider"
         id="scale_slider"
-        @input="handleMouseUp"
+        @input="handleInput('scale', 'scale', $event.target.value)"
       />
     </div>
   </div>
