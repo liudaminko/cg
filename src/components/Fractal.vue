@@ -135,7 +135,7 @@ export default {
     },
     handleMouseScroll(event) {
       event.preventDefault();
-      this.scale += event.deltaY > 0 ? -10 : 10; // Adjust the scale based on scroll direction
+      this.scale += event.deltaY > 0 ? -10 : 10;
       this.clearCanvas();
       this.generateFractal();
     },

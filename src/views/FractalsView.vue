@@ -92,7 +92,10 @@ export default {
             @palette-change="changeColorScheme"
             v-if="showFractal"
           />
-          <AnimateButton @click="startAnimation"></AnimateButton>
+          <AnimateButton
+            @click="startAnimation"
+            v-if="showPlasma"
+          ></AnimateButton>
         </div>
         <div class="footer_buttons">
           <ActionButton @click="showPopup = true">Learn more</ActionButton>

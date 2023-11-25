@@ -191,7 +191,6 @@ function isYellow(r, g, b) {
   );
 }
 function RGBToHSL(r, g, b) {
-  // Make r, g, and b fractions of 1
   r /= 255;
   g /= 255;
   b /= 255;
@@ -203,27 +202,17 @@ function RGBToHSL(r, g, b) {
     h = 0,
     s = 0,
     l = 0;
-  // Calculate hue
-  // No difference
   if (delta == 0) h = 0;
-  // Red is max
   else if (cmax == r) h = ((g - b) / delta) % 6;
-  // Green is max
   else if (cmax == g) h = (b - r) / delta + 2;
-  // Blue is max
   else h = (r - g) / delta + 4;
-
   h = Math.round(h * 60);
-
-  // Make negative hues positive behind 360°
   if (h < 0) h += 360;
-  // Calculate lightness
+
   l = (cmax + cmin) / 2;
 
-  // Calculate saturation
   s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
 
-  // Multiply l and s by 100
   s = +(s * 100).toFixed(1);
   l = +(l * 100).toFixed(1);
 
@@ -280,33 +269,29 @@ function RGBToCMYK(r, g, b) {
   g = Math.min(255, Math.max(0, g));
   b = Math.min(255, Math.max(0, b));
 
-  // Normalize RGB values to the range [0, 1]
+  // normalize RGB values to the range [0, 1]
   const normalizedR = r / 255;
   const normalizedG = g / 255;
   const normalizedB = b / 255;
 
-  // Calculate the K (black) component
   const k = 1 - Math.max(normalizedR, normalizedG, normalizedB);
-
-  // Calculate the C (cyan), M (magenta), and Y (yellow) components
   const c = (1 - normalizedR - k) / (1 - k);
   const m = (1 - normalizedG - k) / (1 - k);
   const y = (1 - normalizedB - k) / (1 - k);
 
-  // Ensure that the CMY components are in the range [0, 1]
+  // check if CMYK components are in the range [0, 1]
   const cyan = Math.min(1, Math.max(0, c));
   const magenta = Math.min(1, Math.max(0, m));
   const yellow = Math.min(1, Math.max(0, y));
   const black = Math.min(1, Math.max(0, k));
 
-  // Return an object containing the CMYK values
   return [cyan, magenta, yellow, black];
 }
 function CMYKToRGB(c, m, y, k) {
-  // Ensure that the CMY components are in the range [0, 1]
+  // check if CMYK components are in the range [0, 1]
   c = Math.min(1, Math.max(0, c));
   m = Math.min(1, Math.max(0, m));
-  y = y / 100; // Normalize yellow to the range [0, 1]
+  y = y / 100;
   k = Math.min(1, Math.max(0, k));
 
   const r = 255 * (1 - c) * (1 - k);

@@ -6,7 +6,7 @@
 
 <script>
 export default {
-  name: 'PlasmaGenerator',
+  name: "PlasmaGenerator",
   props: {
     generatePlasma: Boolean,
   },
@@ -21,18 +21,14 @@ export default {
     generatePlasma(newVal) {
       if (newVal) {
         this.generatePlasmaImage(0, 0, this.canvas.width, this.canvas.height);
-        console.log('dihtkhnjrltl;nhrtkjmnlktyt;lk4enufmg');
       }
-    }
+    },
   },
   mounted() {
-  this.canvas = this.$refs.canvas;
-  this.context = this.canvas.getContext("2d");
-  // Remove this line to start with a transparent canvas
-  // this.context.fillStyle = getRandomColor();
-  this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-}
-,
+    this.canvas = this.$refs.canvas;
+    this.context = this.canvas.getContext("2d");
+    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+  },
   methods: {
     generatePlasmaImage(x, y, width, height) {
       if (width < 2 || this.iterations <= 0) {
@@ -48,9 +44,18 @@ export default {
       const bottomRightColor = getRandomColor();
 
       const topMidColor = calculateMidpointColor(topLeftColor, topRightColor);
-      const leftMidColor = calculateMidpointColor(topLeftColor, bottomLeftColor);
-      const rightMidColor = calculateMidpointColor(topRightColor, bottomRightColor);
-      const bottomMidColor = calculateMidpointColor(bottomLeftColor, bottomRightColor);
+      const leftMidColor = calculateMidpointColor(
+        topLeftColor,
+        bottomLeftColor
+      );
+      const rightMidColor = calculateMidpointColor(
+        topRightColor,
+        bottomRightColor
+      );
+      const bottomMidColor = calculateMidpointColor(
+        bottomLeftColor,
+        bottomRightColor
+      );
 
       const centerColor = calculateMidpointColor(
         calculateMidpointColor(topMidColor, bottomMidColor),
@@ -58,7 +63,12 @@ export default {
       );
 
       this.context.fillStyle = centerColor;
-      this.context.fillRect(x + halfWidth / 2, y + halfHeight / 2, halfWidth, halfHeight);
+      this.context.fillRect(
+        x + halfWidth / 2,
+        y + halfHeight / 2,
+        halfWidth,
+        halfHeight
+      );
 
       this.context.fillStyle = topMidColor;
       this.context.fillRect(x + halfWidth / 2, y, halfWidth, halfHeight / 2);
@@ -67,16 +77,31 @@ export default {
       this.context.fillRect(x, y + halfHeight / 2, halfWidth / 2, halfHeight);
 
       this.context.fillStyle = rightMidColor;
-      this.context.fillRect(x + halfWidth + halfWidth / 2, y + halfHeight / 2, halfWidth / 2, halfHeight);
+      this.context.fillRect(
+        x + halfWidth + halfWidth / 2,
+        y + halfHeight / 2,
+        halfWidth / 2,
+        halfHeight
+      );
 
       this.context.fillStyle = bottomMidColor;
-      this.context.fillRect(x + halfWidth / 2, y + halfHeight, halfWidth, halfHeight / 2);
+      this.context.fillRect(
+        x + halfWidth / 2,
+        y + halfHeight,
+        halfWidth,
+        halfHeight / 2
+      );
 
       this.iterations--;
       this.generatePlasmaImage(x, y, halfWidth, halfHeight);
       this.generatePlasmaImage(x + halfWidth, y, halfWidth, halfHeight);
       this.generatePlasmaImage(x, y + halfHeight, halfWidth, halfHeight);
-      this.generatePlasmaImage(x + halfWidth, y + halfHeight, halfWidth, halfHeight);
+      this.generatePlasmaImage(
+        x + halfWidth,
+        y + halfHeight,
+        halfWidth,
+        halfHeight
+      );
     },
   },
 };
@@ -88,11 +113,12 @@ function getRandomColor() {
   return `rgb(${red | 0}, ${green | 0}, ${blue | 0})`;
 }
 
-
 function calculateMidpointColor(color1, color2) {
   const rgb1 = color1.match(/\d+/g);
   const rgb2 = color2.match(/\d+/g);
-  const midpoint = rgb1.map((value, index) => Math.round((parseInt(value) + parseInt(rgb2[index])) / 2));
+  const midpoint = rgb1.map((value, index) =>
+    Math.round((parseInt(value) + parseInt(rgb2[index])) / 2)
+  );
   return `rgb(${midpoint[0]}, ${midpoint[1]}, ${midpoint[2]})`;
 }
 </script>
